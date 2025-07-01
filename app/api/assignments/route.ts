@@ -1,77 +1,111 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { assignments } from "@/lib/database"
-import type { Assignment } from "@/lib/types"
+import { type NextRequest, NextResponse } from "next/server";
+import { assignments } from "@/lib/database";
+import type { Assignment } from "@/lib/types";
+import { db } from "@/db/connect";
 
 export async function GET(request: NextRequest) {
   try {
-    const url = new URL(request.url)
-    const traineeId = url.searchParams.get("traineeId")
-    const instructorId = url.searchParams.get("instructorId")
+    const url = new URL(request.url);
+    const traineeId = url.searchParams.get("traineeId");
+    const instructorId = url.searchParams.get("instructorId");
 
-    let filteredAssignments = assignments
+    let filteredAssignments = assignments;
 
     if (traineeId) {
-      filteredAssignments = assignments.filter((assignment) => assignment.traineeId === traineeId)
+      filteredAssignments = assignments.filter(
+        (assignment) => assignment.traineeId === traineeId
+      );
     } else if (instructorId) {
-      filteredAssignments = assignments.filter((assignment) => assignment.assignedBy === instructorId)
+      filteredAssignments = assignments.filter(
+        (assignment) => assignment.assignedBy === instructorId
+      );
     }
 
-    return NextResponse.json({ assignments: filteredAssignments })
+    return NextResponse.json({ assignments: filteredAssignments });
   } catch (error) {
-    console.error("Get assignments error:", error)
-    return NextResponse.json({ error: "Failed to fetch assignments" }, { status: 500 })
+    console.error("Get assignments error:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch assignments" },
+      { status: 500 }
+    );
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const { moduleIds, traineeId, assignedBy } = await request.json()
+    const { moduleIds, traineeId, instructorId } = await request.json();
 
-    if (!moduleIds || !Array.isArray(moduleIds) || !traineeId || !assignedBy) {
-      return NextResponse.json({ error: "Invalid assignment data" }, { status: 400 })
+    if (
+      !Array.isArray(moduleIds) ||
+      moduleIds.length === 0 ||
+      moduleIds.some((id) => !id) ||
+      !traineeId ||
+      !instructorId
+    ) {
+      return NextResponse.json(
+        { error: "Invalid assignment data" },
+        { status: 400 }
+      );
     }
 
-    const newAssignments: Assignment[] = moduleIds.map((moduleId) => ({
-      id: `${Date.now()}-${moduleId}-${traineeId}`,
-      moduleId,
-      traineeId,
-      assignedBy,
-      assignedAt: new Date(),
-      isCompleted: false,
-    }))
+    const newAssignments = moduleIds.map((moduleId) => ({
+      moduleId: String(moduleId),
+      traineeId: String(traineeId),
+      instructorId: String(instructorId),
+    }));
 
-    assignments.push(...newAssignments)
+    const addAssignments = await db.assignment.createMany({
+      data: newAssignments,
+    });
 
-    return NextResponse.json({ success: true, assignments: newAssignments })
+    return NextResponse.json({
+      success: true,
+      count: addAssignments.count,
+      assignments: newAssignments,
+    });
   } catch (error) {
-    console.error("Create assignments error:", error)
-    return NextResponse.json({ error: "Failed to create assignments" }, { status: 500 })
+    console.error("Create assignments error:", error);
+    return NextResponse.json(
+      { error: "Failed to create assignments" },
+      { status: 500 }
+    );
   }
 }
 
 export async function PUT(request: NextRequest) {
   try {
-    const { assignmentId, isCompleted } = await request.json()
+    const { assignmentId, isCompleted } = await request.json();
 
     if (!assignmentId || typeof isCompleted !== "boolean") {
-      return NextResponse.json({ error: "Invalid data" }, { status: 400 })
+      return NextResponse.json({ error: "Invalid data" }, { status: 400 });
     }
 
-    const assignmentIndex = assignments.findIndex((assignment) => assignment.id === assignmentId)
+    const assignmentIndex = assignments.findIndex(
+      (assignment) => assignment.id === assignmentId
+    );
     if (assignmentIndex === -1) {
-      return NextResponse.json({ error: "Assignment not found" }, { status: 404 })
+      return NextResponse.json(
+        { error: "Assignment not found" },
+        { status: 404 }
+      );
     }
 
-    assignments[assignmentIndex].isCompleted = isCompleted
+    assignments[assignmentIndex].isCompleted = isCompleted;
     if (isCompleted) {
-      assignments[assignmentIndex].completedAt = new Date()
+      assignments[assignmentIndex].completedAt = new Date();
     } else {
-      delete assignments[assignmentIndex].completedAt
+      delete assignments[assignmentIndex].completedAt;
     }
 
-    return NextResponse.json({ success: true, assignment: assignments[assignmentIndex] })
+    return NextResponse.json({
+      success: true,
+      assignment: assignments[assignmentIndex],
+    });
   } catch (error) {
-    console.error("Update assignment error:", error)
-    return NextResponse.json({ error: "Failed to update assignment" }, { status: 500 })
+    console.error("Update assignment error:", error);
+    return NextResponse.json(
+      { error: "Failed to update assignment" },
+      { status: 500 }
+    );
   }
 }

@@ -28,8 +28,8 @@ model User {
 
   // Relations
   createdModules Module[]
-  assignments    Assignment[]
-  assignedBy     Assignment[]   @relation("AssignmentInstructor")
+  // assignments    Assignment[]
+  // assignedBy     Assignment[]   @relation("AssignmentInstructor")
   progress       Progress[]
   certificates   Certificate[]
   notifications  Notification[]

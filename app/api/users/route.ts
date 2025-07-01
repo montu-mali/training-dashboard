@@ -2,18 +2,38 @@ import { type NextRequest, NextResponse } from "next/server";
 import { users } from "@/lib/database";
 import { db } from "@/db/connect";
 import { decrypt } from "@/lib/data-fetching";
+import { Role } from "@prisma/client";
 
 export async function GET(req: Request) {
   try {
     const url = new URL(req.url);
     const userTokan = url.searchParams.get("profileTokanId") as string;
-
     const userId = decrypt(userTokan);
+    const role = url.searchParams.get("role") as string;
     if (userId) {
       const userData = await db.user.findFirst({
         where: { id: userId },
         select: {
-          id:true,
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          isActive: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+      if (!userData) {
+        return NextResponse.json({ error: "Something Wrong" }, { status: 404 });
+      }
+
+      return NextResponse.json(userData);
+    }
+    if (role) {
+      const userData = await db.user.findMany({
+        where: { role: role as Role },
+        select: {
+          id: true,
           name: true,
           email: true,
           role: true,
