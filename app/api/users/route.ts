@@ -40,6 +40,7 @@ export async function GET(req: Request) {
           isActive: true,
           createdAt: true,
           updatedAt: true,
+          Assignment:true
         },
       });
       if (!userData) {

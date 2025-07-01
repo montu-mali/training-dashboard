@@ -9,19 +9,15 @@ export async function GET(request: NextRequest) {
     const traineeId = url.searchParams.get("traineeId");
     const instructorId = url.searchParams.get("instructorId");
 
-    let filteredAssignments = assignments;
+    let assignments;
 
     if (traineeId) {
-      filteredAssignments = assignments.filter(
-        (assignment) => assignment.traineeId === traineeId
-      );
+      assignments = await db.assignment.findMany({ where: { traineeId } });
     } else if (instructorId) {
-      filteredAssignments = assignments.filter(
-        (assignment) => assignment.assignedBy === instructorId
-      );
+      assignments = await db.assignment.findMany({ where: { instructorId } });
     }
 
-    return NextResponse.json({ assignments: filteredAssignments });
+    return NextResponse.json({ success: true, assignments });
   } catch (error) {
     console.error("Get assignments error:", error);
     return NextResponse.json(
@@ -109,3 +105,19 @@ export async function PUT(request: NextRequest) {
     );
   }
 }
+
+
+
+  // const incomingVariantIds = variants
+  //     .filter((v: Variant) => v.id)
+  //     .map((v: Variant) => v.id as string);
+
+  //   // Delete removed variants
+  //   await db.variants.deleteMany({
+  //     where: {
+  //       productId: productId,
+  //       NOT: {
+  //         id: { in: incomingVariantIds },
+  //       },
+  //     },
+  //   });

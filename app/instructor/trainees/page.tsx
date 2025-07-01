@@ -28,6 +28,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useToast } from "@/hooks/use-toast";
 import axios from "axios";
 import Cookies from "js-cookie";
+import { decrypt } from "@/lib/data-fetching";
 
 export default function TraineesPage() {
   const { user } = useAuth();
@@ -37,12 +38,18 @@ export default function TraineesPage() {
   const [selectedTrainee, setSelectedTrainee] =
     useState<TraineeWithProgress | null>(null);
   const [selectedModules, setSelectedModules] = useState<string[]>([]);
+  // const [assignedModules, setAssignedModules] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
 
   // useEffect(() => {
   //   fetchTrainees();
   // }, [user]);
+
+  const selectAssignModule = (assignmentModul: any) => {
+    const moduleIds = assignmentModul.map((a: any) => a.moduleId);
+    setSelectedModules(moduleIds);
+  };
 
   useEffect(() => {
     const tokanId = Cookies.get("instructorTokan") as string;
@@ -53,7 +60,7 @@ export default function TraineesPage() {
     if (tokanId) {
       fetchTrainees(tokanId);
       fetchModules(tokanId);
-      // getUserData(tokanId);
+      getAssignedModules(tokanId);
     }
   }, []);
 
@@ -67,9 +74,8 @@ export default function TraineesPage() {
 
       const usersData = usersResponse.data;
       const assignmentsData = assignmentsResponse.data;
-      console.log(usersData);
-      console.log(assignmentsData);
       setTrainees(usersData);
+      console.log(usersData);
 
       if (usersData.success && assignmentsData.success) {
         const traineeUsers = usersData.users;
@@ -122,7 +128,7 @@ export default function TraineesPage() {
     }
   };
 
-  console.log(selectedModules);
+  // console.log(selectedModules);
 
   // setAvailableModules(data.modules);
   const handleAssignModules = async () => {
@@ -133,7 +139,7 @@ export default function TraineesPage() {
       const response = await axios.post("/api/assignments", {
         moduleIds: selectedModules,
         traineeId: selectedTrainee.id,
-        assignedBy: user?.id,
+        instructorId: user?.id,
       });
 
       if (response.data.success) {
@@ -141,6 +147,7 @@ export default function TraineesPage() {
           title: "Success",
           description: `Assigned ${selectedModules.length} modules to ${selectedTrainee.name}`,
         });
+        console.log("Assigned done");
 
         // Update trainee progress
         // setTrainees((prev) =>
@@ -176,27 +183,30 @@ export default function TraineesPage() {
     }
   };
 
-  // const getAssignedModules = async (traineeId: string) => {
-  //   try {
-  //     const response = await fetch(`/api/assignments?traineeId=${traineeId}`);
-  //     const data = await response.json();
-  //     if (response.ok) {
-  //       return data.assignments.map((assignment: any) => {
-  //         const module = availableModules.find(
-  //           (m) => m.id === assignment.moduleId
-  //         );
-  //         return {
-  //           ...module,
-  //           isCompleted: assignment.isCompleted,
-  //           completedAt: assignment.completedAt,
-  //         };
-  //       });
-  //     }
-  //   } catch (error) {
-  //     console.error("Failed to fetch assigned modules:", error);
-  //   }
-  //   return [];
-  // };
+  const getAssignedModules = async (traineeId: string) => {
+    try {
+      const response = await axios.get(
+        `/api/assignments?traineeId=${decrypt(traineeId)}`
+      );
+      const data = response.data;
+      console.log(data.assignments);
+      if (data.success) {
+        return data.map((assignment: any) => {
+          const module = availableModules.find(
+            (m: any) => m.id === assignment.moduleId
+          );
+          return {
+            ...module,
+            isCompleted: assignment.isCompleted,
+            completedAt: assignment.completedAt,
+          };
+        });
+      }
+    } catch (error) {
+      console.error("Failed to fetch assigned modules:", error);
+    }
+    return [];
+  };
 
   // const getAvailableModulesForTrainee = async (traineeId: string) => {
   //   try {
@@ -225,7 +235,7 @@ export default function TraineesPage() {
   //         </div>
   //       </DashboardLayout>
   //     </ProtectedRoute>
-  //   )
+  //   );
   // }
 
   return (
@@ -240,7 +250,7 @@ export default function TraineesPage() {
 
         {/* Trainees Grid */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {trainees?.map((trainee) => (
+          {trainees?.map((trainee: any) => (
             <Card key={trainee.id}>
               <CardHeader>
                 <div className="flex items-start justify-between">
@@ -253,6 +263,7 @@ export default function TraineesPage() {
                         onClick={async () => {
                           setSelectedTrainee(trainee);
                           setSelectedModules([]);
+                          selectAssignModule(trainee?.Assignment);
                           // You could fetch available modules here if needed
                         }}
                       >
@@ -277,7 +288,7 @@ export default function TraineesPage() {
                               // This is a simplified version - in real app, you'd fetch this data
                               return true;
                             })
-                            .map((module:any) => (
+                            .map((module: any) => (
                               <div
                                 key={module.id}
                                 className="flex items-center space-x-2"

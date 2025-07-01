@@ -35,6 +35,7 @@ model User {
   notifications  Notification[]
   sessions       Session[]
   auditLogs      AuditLog[]
+  Assignment     Assignment[]
 
   @@map("users")
 }
@@ -73,9 +74,10 @@ model Assignment {
   updatedAt           DateTime         @updatedAt
 
   // Relations
-  moduleId String
-  module   Module @relation(fields: [moduleId], references: [id])
-  traineeId String
+  moduleId     String
+  module       Module @relation(fields: [moduleId], references: [id])
+  traineeId    String
+  user         User   @relation(fields: [traineeId], references: [id])
   instructorId String
 }
 
