@@ -1,0 +1,287 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(TRAINEE)
+  avatar    String?
+  phone     String?
+  department String?
+  position  String?
+  bio       String?
+  skills    String[]
+  timezone  String   @default("UTC")
+  language  String   @default("en")
+  isActive  Boolean  @default(true)
+  lastLogin DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  createdModules    Module[]       @relation("ModuleCreator")
+  assignments       Assignment[]   @relation("AssignmentTrainee")
+  assignedBy        Assignment[]   @relation("AssignmentInstructor")
+  progress          Progress[]
+  certificates      Certificate[]
+  notifications     Notification[]
+  sessions          Session[]
+  auditLogs         AuditLog[]
+
+  @@map("users")
+}
+
+model Module {
+  id                String     @id @default(auto()) @map("_id") @db.ObjectId
+  title             String
+  description       String
+  content           String
+  category          String
+  difficulty        Difficulty @default(BEGINNER)
+  estimatedDuration Int        // in minutes
+  objectives        String[]
+  prerequisites     String[]
+  tags              String[]
+  thumbnailUrl      String?
+  videoUrls         String[]
+  documentUrls      String[]
+  isActive          Boolean    @default(true)
+  isPublished       Boolean    @default(false)
+  version           String     @default("1.0.0")
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  // Relations
+  createdBy     String       @db.ObjectId
+  creator       User         @relation("ModuleCreator", fields: [createdBy], references: [id])
+  assignments   Assignment[]
+  progress      Progress[]
+  certificates  Certificate[]
+
+  @@map("modules")
+}
+
+model Assignment {
+  id                   String            @id @default(auto()) @map("_id") @db.ObjectId
+  title                String
+  description          String
+  instructions         String?
+  dueDate              DateTime?
+  priority             Priority          @default(MEDIUM)
+  status               AssignmentStatus  @default(PENDING)
+  maxAttempts          Int               @default(3)
+  currentAttempts      Int               @default(0)
+  passingScore         Int               @default(70)
+  timeLimit            Int?              // in minutes
+  allowLateSubmission  Boolean           @default(true)
+  isActive             Boolean           @default(true)
+  metadata             Json              @default("{}")
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+
+  // Relations
+  moduleId     String @db.ObjectId
+  module       Module @relation(fields: [moduleId], references: [id])
+  traineeId    String @db.ObjectId
+  trainee      User   @relation("AssignmentTrainee", fields: [traineeId], references: [id])
+  assignedBy   String @db.ObjectId
+  instructor   User   @relation("AssignmentInstructor", fields: [assignedBy], references: [id])
+
+  @@map("assignments")
+}
+
+model Progress {
+  id                   String        @id @default(auto()) @map("_id") @db.ObjectId
+  completionPercentage Int           @default(0)
+  timeSpent            Int           @default(0) // in minutes
+  score                Int?
+  status               ProgressStatus @default(NOT_STARTED)
+  currentSection       String?
+  lastAccessedAt       DateTime      @default(now())
+  completedSections    String[]
+  bookmarks            String[]
+  notes                String[]
+  feedback             String?
+  isCompleted          Boolean       @default(false)
+  metadata             Json          @default("{}")
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+
+  // Relations
+  userId   String @db.ObjectId
+  user     User   @relation(fields: [userId], references: [id])
+  moduleId String @db.ObjectId
+  module   Module @relation(fields: [moduleId], references: [id])
+
+  @@unique([userId, moduleId])
+  @@map("progress")
+}
+
+model Certificate {
+  id              String            @id @default(auto()) @map("_id") @db.ObjectId
+  certificateName String
+  description     String?
+  issueDate       DateTime          @default(now())
+  expiryDate      DateTime?
+  certificateUrl  String?
+  score           Int
+  status          CertificateStatus @default(ACTIVE)
+  metadata        Json              @default("{}")
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  // Relations
+  userId   String @db.ObjectId
+  user     User   @relation(fields: [userId], references: [id])
+  moduleId String @db.ObjectId
+  module   Module @relation(fields: [moduleId], references: [id])
+
+  @@map("certificates")
+}
+
+model Notification {
+  id         String             @id @default(auto()) @map("_id") @db.ObjectId
+  title      String
+  message    String
+  type       NotificationType   @default(INFO)
+  priority   Priority           @default(MEDIUM)
+  actionUrl  String?
+  actionText String?
+  isRead     Boolean            @default(false)
+  expiresAt  DateTime?
+  metadata   Json               @default("{}")
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+
+  // Relations
+  userId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@map("notifications")
+}
+
+model Session {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  sessionId  String   @unique
+  ipAddress  String?
+  userAgent  String?
+  location   String?
+  isActive   Boolean  @default(true)
+  lastActive DateTime @default(now())
+  createdAt  DateTime @default(now())
+  expiresAt  DateTime
+
+  // Relations
+  userId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@map("sessions")
+}
+
+model AuditLog {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  action      String
+  entityType  String
+  entityId    String?
+  oldValues   Json?
+  newValues   Json?
+  ipAddress   String?
+  userAgent   String?
+  metadata    Json      @default("{}")
+  createdAt   DateTime  @default(now())
+
+  // Relations
+  userId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@map("audit_logs")
+}
+
+model Analytics {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  metric    String
+  value     Float
+  dimension String?
+  date      DateTime @default(now())
+  hour      Int?
+  metadata  Json     @default("{}")
+  createdAt DateTime @default(now())
+
+  @@index([metric, date])
+  @@index([date, hour])
+  @@map("analytics")
+}
+
+model SystemConfig {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  key         String   @unique
+  value       Json
+  category    String?
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("system_config")
+}
+
+// Enums
+enum Role {
+  ADMIN
+  INSTRUCTOR
+  TRAINEE
+  MANAGER
+}
+
+enum Difficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum AssignmentStatus {
+  PENDING
+  IN_PROGRESS
+  SUBMITTED
+  REVIEWED
+  COMPLETED
+  OVERDUE
+}
+
+enum ProgressStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+  PAUSED
+}
+
+enum CertificateStatus {
+  ACTIVE
+  EXPIRED
+  REVOKED
+}
+
+enum NotificationType {
+  INFO
+  SUCCESS
+  WARNING
+  ERROR
+}
