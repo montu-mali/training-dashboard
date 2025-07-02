@@ -72,9 +72,10 @@ export async function POST(req: Request) {
   }
 }
 
-export async function PUT(request: NextRequest) {
+export async function PUT(req: Request) {
   try {
-    const { id, title, description, content } = await request.json();
+    const { id, title, content, description, estimatedDuration } =
+      await req.json();
 
     if (!id || !title || !description || !content) {
       return NextResponse.json(
@@ -83,19 +84,12 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const moduleIndex = modules.findIndex((module) => module.id === id);
-    if (moduleIndex === -1) {
-      return NextResponse.json({ error: "Module not found" }, { status: 404 });
-    }
+    const moduleUpdate = await db.module.update({
+      where: { id },
+      data: { title, description, content, estimatedDuration },
+    });
 
-    modules[moduleIndex] = {
-      ...modules[moduleIndex],
-      title,
-      description,
-      content,
-    };
-
-    return NextResponse.json({ success: true, module: modules[moduleIndex] });
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Update module error:", error);
     return NextResponse.json(
@@ -105,10 +99,10 @@ export async function PUT(request: NextRequest) {
   }
 }
 
-export async function DELETE(request: NextRequest) {
+export async function DELETE(req: Request) {
   try {
-    const url = new URL(request.url);
-    const moduleId = url.searchParams.get("id");
+    const url = new URL(req.url);
+    const moduleId = url.searchParams.get("id") as string;
 
     if (!moduleId) {
       return NextResponse.json(
@@ -117,25 +111,14 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    const moduleIndex = modules.findIndex((module) => module.id === moduleId);
-    if (moduleIndex === -1) {
-      return NextResponse.json({ error: "Module not found" }, { status: 404 });
+    const deleteAssignment = await db.assignment.deleteMany({
+      where: { moduleId },
+    });
+
+    if (deleteAssignment) {
+      const moduleDelete = await db.module.delete({ where: { id: moduleId } });
+      return NextResponse.json({ success: true });
     }
-
-    // Remove module
-    modules.splice(moduleIndex, 1);
-
-    // Remove related assignments
-    const assignmentIndices = assignments
-      .map((assignment, index) =>
-        assignment.moduleId === moduleId ? index : -1
-      )
-      .filter((index) => index !== -1)
-      .reverse();
-
-    assignmentIndices.forEach((index) => assignments.splice(index, 1));
-
-    return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Delete module error:", error);
     return NextResponse.json(

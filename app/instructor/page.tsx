@@ -72,6 +72,13 @@ export default function InstructorDashboard() {
     content: "",
     estimatedDuration: 14,
   });
+  const [updateData, setUpdateData] = useState({
+    id: "",
+    title: "",
+    description: "",
+    content: "",
+    estimatedDuration: 14,
+  });
 
   useEffect(() => {
     // fetchModules();
@@ -80,10 +87,6 @@ export default function InstructorDashboard() {
 
   useEffect(() => {
     const tokanId = Cookies.get("instructorTokan") as string;
-    // if (!tokanId) {
-    //   router.push("/login");
-    // }
-    // setUserTokan(tokanId);
     if (tokanId) {
       fetchModules(tokanId);
       getUserData(tokanId);
@@ -172,9 +175,42 @@ export default function InstructorDashboard() {
     }
   };
 
-  const handleEdit = (module: Module) => {
+  const handleUpdateSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const response = await axios.put(`/api/modules`, updateData);
+      if (response.data.success) {
+        console.log("Module updated Successfully");
+        toast({
+          title: "Success",
+          description: "Module updated successfully",
+        });
+        setEditingModule(null);
+        setFormData({
+          title: "",
+          description: "",
+          content: "",
+          estimatedDuration: 14,
+        });
+      }
+      setIsCreateDialogOpen(false);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to updated module",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleEdit = (module: any) => {
     setEditingModule(module);
-    setFormData({
+    setUpdateData({
+      id: module.id,
       title: module.title,
       description: module.description,
       content: module.content,
@@ -182,41 +218,32 @@ export default function InstructorDashboard() {
     });
   };
 
-  // const handleDelete = async (moduleId: string) => {
-  //   if (
-  //     !confirm(
-  //       "Are you sure you want to delete this module? This will also remove all related assignments."
-  //     )
-  //   ) {
-  //     return;
-  //   }
+  const handleDelete = async (moduleId: string) => {
+    if (
+      !confirm(
+        "Are you sure you want to delete this module? This will also remove all related assignments."
+      )
+    ) {
+      return;
+    }
+    try {
+      const response = await axios.delete(`/api/modules?id=${moduleId}`);
 
-  //   try {
-  //     const response = await fetch(`/api/modules?id=${moduleId}`, {
-  //       method: "DELETE",
-  //     });
-
-  //     if (response.ok) {
-  //       setModuleList((prev) =>
-  //         prev.filter((module) => module.id !== moduleId)
-  //       );
-  //       toast({
-  //         title: "Success",
-  //         description: "Module deleted successfully",
-  //       });
-  //       fetchStats(); // Refresh stats
-  //     } else {
-  //       const data = await response.json();
-  //       throw new Error(data.error);
-  //     }
-  //   } catch (error: any) {
-  //     toast({
-  //       title: "Error",
-  //       description: error.message || "Failed to delete module",
-  //       variant: "destructive",
-  //     });
-  //   }
-  // };
+      if (response.data.success) {
+        toast({
+          title: "Success",
+          description: "Module deleted successfully",
+        });
+        fetchStats(); // Refresh stats
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete module",
+        variant: "destructive",
+      });
+    }
+  };
 
   const resetForm = () => {
     setFormData({
@@ -341,7 +368,6 @@ export default function InstructorDashboard() {
             </Dialog>
           </div>
 
-          {/* Quick Stats Overview */}
           <div className="grid gap-4 md:grid-cols-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -351,7 +377,9 @@ export default function InstructorDashboard() {
                 <BookOpen className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{instructorModules?.length}</div>
+                <div className="text-2xl font-bold">
+                  {instructorModules?.length}
+                </div>
                 <p className="text-xs text-muted-foreground">Created by you</p>
               </CardContent>
             </Card>
@@ -414,14 +442,14 @@ export default function InstructorDashboard() {
                   Update the training module details.
                 </DialogDescription>
               </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleUpdateSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="edit-title">Title</Label>
                   <Input
                     id="edit-title"
-                    value={formData.title}
+                    value={updateData.title}
                     onChange={(e) =>
-                      setFormData({ ...formData, title: e.target.value })
+                      setUpdateData({ ...updateData, title: e.target.value })
                     }
                     required
                     disabled={isLoading}
@@ -431,9 +459,12 @@ export default function InstructorDashboard() {
                   <Label htmlFor="edit-description">Description</Label>
                   <Input
                     id="edit-description"
-                    value={formData.description}
+                    value={updateData.description}
                     onChange={(e) =>
-                      setFormData({ ...formData, description: e.target.value })
+                      setUpdateData({
+                        ...updateData,
+                        description: e.target.value,
+                      })
                     }
                     required
                     disabled={isLoading}
@@ -444,9 +475,9 @@ export default function InstructorDashboard() {
                   <Textarea
                     id="edit-content"
                     rows={4}
-                    value={formData.content}
+                    value={updateData.content}
                     onChange={(e) =>
-                      setFormData({ ...formData, content: e.target.value })
+                      setUpdateData({ ...updateData, content: e.target.value })
                     }
                     required
                     disabled={isLoading}
@@ -478,7 +509,7 @@ export default function InstructorDashboard() {
 
           {/* Modules Grid */}
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {instructorModules?.map((module:any) => (
+            {instructorModules?.map((module: any) => (
               <Card key={module.id}>
                 <CardHeader>
                   <div className="flex items-start justify-between">
