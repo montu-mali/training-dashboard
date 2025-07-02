@@ -3,7 +3,7 @@ import { db } from "@/db/connect";
 import { generateToken } from "@/lib/auth";
 import bcrypt from "bcrypt";
 
-export async function POST(req: Request) {
+export async function POST(req:  NextRequest) {
   try {
     const { email, password } = await req.json();
 
