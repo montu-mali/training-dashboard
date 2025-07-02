@@ -546,7 +546,7 @@ export default function InstructorDashboard() {
             ))}
           </div>
 
-          {moduleList.length === 0 && (
+          {instructorModules?.length === 0 && (
             <div className="text-center py-12">
               <BookOpen className="mx-auto h-12 w-12 text-gray-400" />
               <h3 className="mt-2 text-sm font-medium text-gray-900">
@@ -562,31 +562,3 @@ export default function InstructorDashboard() {
     </>
   );
 }
-
-// if (editingModule) {
-//       // Update existing module
-//       const response = await fetch("/api/modules", {
-//         method: "PUT",
-//         headers: { "Content-Type": "application/json" },
-//         body: JSON.stringify({
-//           id: editingModule.id,
-//           ...formData,
-//         }),
-//       });
-
-//       const data = await response.json();
-//       if (response.ok) {
-//         setModuleList((prev) =>
-//           prev.map((module) =>
-//             module.id === editingModule.id ? data.module : module
-//           )
-//         );
-//         toast({
-//           title: "Success",
-//           description: "Module updated successfully",
-//         });
-//         setEditingModule(null);
-//       } else {
-//         throw new Error(data.error);
-//       }
-//     } else {
