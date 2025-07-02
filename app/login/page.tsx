@@ -81,10 +81,6 @@ export default function LoginPage() {
     }
   };
 
-  useEffect(() => {
-    handleSubmit();
-  }, []);
-
   // Quick login function for demo
   const quickLogin = (email: string, password: string) => {
     setFormData({ email, password });
@@ -160,32 +156,6 @@ export default function LoginPage() {
             <Link href="/signup" className="text-blue-600 hover:underline">
               Sign up
             </Link>
-          </div>
-
-          <div className="mt-4 p-4 bg-gray-50 rounded-lg text-sm">
-            <p className="font-medium mb-3">Demo Accounts:</p>
-            <div className="space-y-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full text-left justify-start"
-                onClick={() =>
-                  quickLogin("instructor@example.com", "password123")
-                }
-                type="button"
-              >
-                <strong>Instructor:</strong> instructor@example.com
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full text-left justify-start"
-                onClick={() => quickLogin("trainee@example.com", "password123")}
-                type="button"
-              >
-                <strong>Trainee:</strong> trainee@example.com
-              </Button>
-            </div>
           </div>
         </CardContent>
       </Card>
