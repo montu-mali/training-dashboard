@@ -75,22 +75,9 @@ export default function LoginPage() {
       }
     } catch (error) {
       console.error("Login error:", error);
-      // setError("Network error - please check your connection");
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // Quick login function for demo
-  const quickLogin = (email: string, password: string) => {
-    setFormData({ email, password });
-    // Trigger form submission after state update
-    setTimeout(() => {
-      const form = document.querySelector("form") as HTMLFormElement;
-      if (form) {
-        form.requestSubmit();
-      }
-    }, 100);
   };
 
   return (

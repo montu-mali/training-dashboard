@@ -34,14 +34,6 @@ export async function POST(req: Request) {
       console.log("Invalid password for user:", email);
       return NextResponse.json({ success: false, message: "invalid password" });
     }
-
-    // Optionally generate JWT token
-    // const token = generateToken({
-    //   id: user.id,
-    //   email: user.email,
-    //   role: user.role,
-    // });
-
     return NextResponse.json({
       success: true,
       message: "Login Successfully",
