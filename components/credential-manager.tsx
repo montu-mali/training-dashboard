@@ -26,7 +26,6 @@ import {
   Shield,
   Loader2,
 } from "lucide-react";
-import { useAuth } from "@/lib/auth-context";
 import { useToast } from "@/hooks/use-toast";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
@@ -52,7 +51,6 @@ interface User {
 }
 
 export function CredentialManager() {
-  const { user } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
   const [profileData, setProfileData] = useState<User>();
