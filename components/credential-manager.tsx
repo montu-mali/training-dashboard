@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -12,7 +12,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { User, Lock, Mail, Save, Eye, EyeOff, Shield, Loader2 } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 import { useToast } from "@/hooks/use-toast"
-
+import Cookies from "js-cookie";
+import { useRouter } from "next/navigation"
 interface CredentialData {
   name: string
   email: string
@@ -24,6 +25,7 @@ interface CredentialData {
 export function CredentialManager() {
   const { user } = useAuth()
   const { toast } = useToast()
+    const router = useRouter();
   const [isLoading, setIsLoading] = useState(false)
   const [showPasswords, setShowPasswords] = useState({
     current: false,
@@ -38,6 +40,19 @@ export function CredentialManager() {
     confirmPassword: "",
   })
   const [errors, setErrors] = useState<Partial<CredentialData>>({})
+
+ useEffect(() => {
+    const tokanId = Cookies.get("userTokan") as string;
+    if (!tokanId) {
+      router.push("/login");
+    }
+    if (tokanId) {
+      // getOrderData(tokanId);
+      fetchAssignedModules(tokanId);
+    }
+  }, []);
+
+
 
   const validateForm = () => {
     const newErrors: Partial<CredentialData> = {}

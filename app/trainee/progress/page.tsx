@@ -77,7 +77,6 @@ export default function ProgressPage() {
   ]
 
   return (
-    <ProtectedRoute requiredRole="trainee">
       <DashboardLayout>
         <div className="space-y-6">
           <div>
@@ -240,6 +239,5 @@ export default function ProgressPage() {
           </Card>
         </div>
       </DashboardLayout>
-    </ProtectedRoute>
   )
 }
