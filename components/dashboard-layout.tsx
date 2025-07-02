@@ -38,6 +38,7 @@ interface User {
   isActive: boolean;
 }
 import Cookies from "js-cookie";
+import { toast } from "@/hooks/use-toast";
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const router = useRouter();
@@ -73,6 +74,17 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     } finally {
       // setLoder(false);
     }
+  };
+
+    const UserLogOut = () => {
+    Cookies.remove("instructorTokan");
+    // setIsLoggedIn(false);
+    toast({
+      title: "Logged out",
+      description: "You have been successfully logged out",
+    });
+    router.push("/login");
+    router.refresh();
   };
 
   const navigation =
