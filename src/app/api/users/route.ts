@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { users } from "@/lib/database";
+import { users } from "@/src/lib/database";
 import { db } from "@/db/connect";
-import { decrypt } from "@/lib/data-fetching";
+import { decrypt } from "@/src/lib/data-fetching";
 import { Role } from "@prisma/client";
 
 export async function GET(req: Request) {

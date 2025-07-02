@@ -24,7 +24,7 @@ import {
   X,
   GitBranch,
 } from "lucide-react";
-import { decrypt } from "@/lib/data-fetching";
+import { decrypt } from "@/src/lib/data-fetching";
 import axios from "axios";
 
 interface DashboardLayoutProps {
@@ -38,7 +38,7 @@ interface User {
   isActive: boolean;
 }
 import Cookies from "js-cookie";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/src/hooks/use-toast";
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const router = useRouter();

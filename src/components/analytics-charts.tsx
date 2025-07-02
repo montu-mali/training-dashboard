@@ -34,7 +34,7 @@ import {
   LabelList,
 } from "recharts"
 import { TrendingUp, Users, BookOpen, Clock, Target, Activity, Zap, Download, RefreshCw } from "lucide-react"
-import { useAuth } from "@/lib/auth-context"
+import { useAuth } from "@/src/lib/auth-context"
 
 interface AnalyticsData {
   overview: {

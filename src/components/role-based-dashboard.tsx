@@ -1,6 +1,6 @@
 "use client"
 
-import { useAuth } from "@/lib/auth-context"
+import { useAuth } from "@/src/lib/auth-context"
 import { InstructorDashboard } from "./instructor-dashboard"
 import { TraineeDashboard } from "./trainee-dashboard"
 import { AdminDashboard } from "./admin-dashboard"

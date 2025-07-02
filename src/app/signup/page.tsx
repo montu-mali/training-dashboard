@@ -17,9 +17,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { BookOpen, Loader2 } from "lucide-react";
-import { useAuth } from "@/lib/auth-context";
+import { useAuth } from "@/src/lib/auth-context";
 import Cookies from "js-cookie";
-import { encrypt } from "@/lib/data-fetching";
+import { encrypt } from "@/src/lib/data-fetching";
 
 export default function SignupPage() {
   const router = useRouter();

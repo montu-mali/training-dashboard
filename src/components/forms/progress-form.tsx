@@ -13,7 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Slider } from "@/components/ui/slider"
 import { Badge } from "@/components/ui/badge"
 import { X, Plus, Loader2, TrendingUp, Clock, BookOpen, Star } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
+import { useToast } from "@/src/hooks/use-toast"
 
 interface ProgressFormData {
   userId: string

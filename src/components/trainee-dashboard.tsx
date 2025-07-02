@@ -21,7 +21,7 @@ import {
 } from "recharts"
 import { BookOpen, CheckCircle, Clock, TrendingUp, Award, Target, Calendar, Play } from "lucide-react"
 import { DashboardLayout } from "./dashboard-layout"
-import { useAuth } from "@/lib/auth-context"
+import { useAuth } from "@/src/lib/auth-context"
 import Link from "next/link"
 
 interface TraineeStats {

@@ -1,5 +1,5 @@
 import { db } from "@/db/connect";
-import { decrypt } from "@/lib/data-fetching";
+import { decrypt } from "@/src/lib/data-fetching";
 import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 

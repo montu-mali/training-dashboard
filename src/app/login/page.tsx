@@ -15,11 +15,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { BookOpen, Loader2 } from "lucide-react";
-import { useAuth } from "@/lib/auth-context";
+import { useAuth } from "@/src/lib/auth-context";
 import axios from "axios";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/src/hooks/use-toast";
 import Cookies from "js-cookie";
-import { encrypt } from "@/lib/data-fetching";
+import { encrypt } from "@/src/lib/data-fetching";
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({

@@ -20,7 +20,7 @@ import {
 } from "recharts"
 import { Users, BookOpen, TrendingUp, Shield, Settings, UserPlus, Activity } from "lucide-react"
 import { DashboardLayout } from "./dashboard-layout"
-import { useAuth } from "@/lib/auth-context"
+import { useAuth } from "@/src/lib/auth-context"
 
 interface AdminStats {
   totalUsers: number

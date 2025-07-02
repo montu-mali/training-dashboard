@@ -10,8 +10,8 @@ import { Separator } from "@/components/ui/separator"
 import { User, Lock, Save, Loader2 } from "lucide-react"
 import { ProtectedRoute } from "@/components/protected-route"
 import { DashboardLayout } from "@/components/dashboard-layout"
-import { useAuth } from "@/lib/auth-context"
-import { useToast } from "@/hooks/use-toast"
+import { useAuth } from "@/src/lib/auth-context"
+import { useToast } from "@/src/hooks/use-toast"
 
 export default function InstructorSettingsPage() {
   const { user } = useAuth()

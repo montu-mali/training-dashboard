@@ -21,9 +21,9 @@ import {
 import { BookOpen, CheckCircle, Clock, TrendingUp } from "lucide-react"
 import { ProtectedRoute } from "@/components/protected-route"
 import { DashboardLayout } from "@/components/dashboard-layout"
-import type { ModuleWithProgress } from "@/lib/types"
-import { modules, assignments } from "@/lib/database"
-import { useAuth } from "@/lib/auth-context"
+import type { ModuleWithProgress } from "@/src/lib/types"
+import { modules, assignments } from "@/src/lib/database"
+import { useAuth } from "@/src/lib/auth-context"
 
 export default function ProgressPage() {
   const { user } = useAuth()

@@ -26,12 +26,12 @@ import {
   Shield,
   Loader2,
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/src/hooks/use-toast";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import validatePassword from "@/lib/validatePassword";
-import { decrypt } from "@/lib/data-fetching";
+import validatePassword from "@/src/lib/validatePassword";
+import { decrypt } from "@/src/lib/data-fetching";
 interface CredentialProData {
   name: string;
   email: string;

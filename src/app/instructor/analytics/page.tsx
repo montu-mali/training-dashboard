@@ -21,8 +21,8 @@ import {
 import { Users, BookOpen, TrendingUp, Award, Calendar, Target } from "lucide-react"
 import { ProtectedRoute } from "@/components/protected-route"
 import { DashboardLayout } from "@/components/dashboard-layout"
-import type { TraineeWithProgress } from "@/lib/types"
-import { users, modules, assignments } from "@/lib/database"
+import type { TraineeWithProgress } from "@/src/lib/types"
+import { users, modules, assignments } from "@/src/lib/database"
 
 export default function AnalyticsPage() {
   const [trainees, setTrainees] = useState<TraineeWithProgress[]>([])

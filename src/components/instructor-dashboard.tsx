@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts"
 import { BookOpen, Users, TrendingUp, Award, Calendar, Target, Plus, Eye } from "lucide-react"
 import { DashboardLayout } from "./dashboard-layout"
-import { useAuth } from "@/lib/auth-context"
+import { useAuth } from "@/src/lib/auth-context"
 import Link from "next/link"
 
 interface DashboardStats {

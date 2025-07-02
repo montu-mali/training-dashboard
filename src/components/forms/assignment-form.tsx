@@ -14,8 +14,8 @@ import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { CalendarIcon, Loader2, ClipboardList, AlertCircle, Flag } from "lucide-react"
 import { format } from "date-fns"
-import { cn } from "@/lib/utils"
-import { useToast } from "@/hooks/use-toast"
+import { cn } from "@/src/lib/utils"
+import { useToast } from "@/src/hooks/use-toast"
 
 interface AssignmentFormData {
   title: string

@@ -1,8 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { assignments } from "@/lib/database";
-import type { Assignment } from "@/lib/types";
+import { assignments } from "@/src/lib/database";
+import type { Assignment } from "@/src/lib/types";
 import { db } from "@/db/connect";
-import { decrypt } from "@/lib/data-fetching";
+import { decrypt } from "@/src/lib/data-fetching";
 
 export async function GET(request: NextRequest) {
   try {

@@ -1,8 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { modules, assignments } from "@/lib/database";
-import type { Module } from "@/lib/types";
+import { modules, assignments } from "@/src/lib/database";
+import type { Module } from "@/src/lib/types";
 import { db } from "@/db/connect";
-import { decrypt } from "@/lib/data-fetching";
+import { decrypt } from "@/src/lib/data-fetching";
 
 export async function GET(request: NextRequest) {
   try {

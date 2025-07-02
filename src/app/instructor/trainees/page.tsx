@@ -23,12 +23,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Users, UserPlus, Loader2 } from "lucide-react";
 import { ProtectedRoute } from "@/components/protected-route";
 import { DashboardLayout } from "@/components/dashboard-layout";
-import type { TraineeWithProgress, Module } from "@/lib/types";
-import { useAuth } from "@/lib/auth-context";
-import { useToast } from "@/hooks/use-toast";
+import type { TraineeWithProgress, Module } from "@/src/lib/types";
+import { useAuth } from "@/src/lib/auth-context";
+import { useToast } from "@/src/hooks/use-toast";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { decrypt } from "@/lib/data-fetching";
+import { decrypt } from "@/src/lib/data-fetching";
 import { useRouter } from "next/navigation";
 
 export default function TraineesPage() {

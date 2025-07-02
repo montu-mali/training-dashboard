@@ -14,10 +14,10 @@ import { Progress } from "@/components/ui/progress";
 import { BookOpen, CheckCircle, Clock, Loader2 } from "lucide-react";
 import { ProtectedRoute } from "@/components/protected-route";
 import { DashboardLayout } from "@/components/dashboard-layout";
-import type { ModuleWithProgress } from "@/lib/types";
-import { useAuth } from "@/lib/auth-context";
+import type { ModuleWithProgress } from "@/src/lib/types";
+import { useAuth } from "@/src/lib/auth-context";
 import axios from "axios";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/src/hooks/use-toast";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 

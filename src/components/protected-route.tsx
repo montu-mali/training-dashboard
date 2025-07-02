@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { useAuth } from "@/lib/auth-context"
+import { useAuth } from "@/src/lib/auth-context"
 import { Loader2 } from "lucide-react"
 
 interface ProtectedRouteProps {

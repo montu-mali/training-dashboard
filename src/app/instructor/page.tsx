@@ -33,12 +33,12 @@ import {
 } from "lucide-react";
 import { ProtectedRoute } from "@/components/protected-route";
 import { DashboardLayout } from "@/components/dashboard-layout";
-import type { Module } from "@/lib/types";
+import type { Module } from "@/src/lib/types";
 import { Progress } from "@/components/ui/progress";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/src/hooks/use-toast";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
-import { decrypt } from "@/lib/data-fetching";
+import { decrypt } from "@/src/lib/data-fetching";
 import axios from "axios";
 
 interface User {

@@ -14,8 +14,8 @@ import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { CalendarIcon, Loader2, Bell, AlertCircle, Info, CheckCircle, AlertTriangle } from "lucide-react"
 import { format } from "date-fns"
-import { cn } from "@/lib/utils"
-import { useToast } from "@/hooks/use-toast"
+import { cn } from "@/src/lib/utils"
+import { useToast } from "@/src/hooks/use-toast"
 
 interface NotificationFormData {
   userId: string
