@@ -29,22 +29,20 @@ import { useToast } from "@/hooks/use-toast";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { decrypt } from "@/lib/data-fetching";
+import { useRouter } from "next/navigation";
 
 export default function TraineesPage() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { push } = useRouter();
   const [trainees, setTrainees] = useState<TraineeWithProgress[]>([]);
   const [availableModules, setAvailableModules] = useState<Module[]>([]);
   const [selectedTrainee, setSelectedTrainee] =
     useState<TraineeWithProgress | null>(null);
   const [selectedModules, setSelectedModules] = useState<string[]>([]);
-  // const [assignedModules, setAssignedModules] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
-
-  // useEffect(() => {
-  //   fetchTrainees();
-  // }, [user]);
+  const [userTokan, setUserTokan] = useState("");
 
   const selectAssignModule = (assignmentModul: any) => {
     const moduleIds = assignmentModul.map((a: any) => a.moduleId);
@@ -53,10 +51,10 @@ export default function TraineesPage() {
 
   useEffect(() => {
     const tokanId = Cookies.get("instructorTokan") as string;
-    // if (!tokanId) {
-    //   router.push("/login");
-    // }
-    // setUserTokan(tokanId);
+    if (!tokanId) {
+      push("/login");
+    }
+    setUserTokan(tokanId);
     if (tokanId) {
       fetchTrainees(tokanId);
       fetchModules(tokanId);
@@ -75,7 +73,6 @@ export default function TraineesPage() {
       const usersData = usersResponse.data;
       const assignmentsData = assignmentsResponse.data;
       setTrainees(usersData);
-      console.log(usersData);
 
       if (usersData.success && assignmentsData.success) {
         const traineeUsers = usersData.users;
@@ -120,17 +117,11 @@ export default function TraineesPage() {
       const response = await axios.get(`/api/modules?instructorId=${tokanId}`);
       console.log(response.data.instructorModules);
       setAvailableModules(response.data.instructorModules);
-      if (response) {
-        // setModuleList(data.modules);
-      }
     } catch (error) {
       console.error("Failed to fetch modules:", error);
     }
   };
 
-  // console.log(selectedModules);
-
-  // setAvailableModules(data.modules);
   const handleAssignModules = async () => {
     if (!selectedTrainee || selectedModules.length === 0) return;
 
@@ -148,27 +139,7 @@ export default function TraineesPage() {
           description: `Assigned ${selectedModules.length} modules to ${selectedTrainee.name}`,
         });
         console.log("Assigned done");
-
-        // Update trainee progress
-        // setTrainees((prev) =>
-        //   prev.map((trainee) =>
-        //     trainee.id === selectedTrainee.id
-        //       ? {
-        //           ...trainee,
-        //           totalModules: trainee.totalModules + selectedModules.length,
-        //           progressPercentage: Math.round(
-        //             (trainee.completedModules /
-        //               (trainee.totalModules + selectedModules.length)) *
-        //               100
-        //           ),
-        //         }
-        //       : trainee
-        //   )
-        // );
-
-        // Reset selection
-        setSelectedTrainee(null);
-        setSelectedModules([]);
+        fetchTrainees(userTokan);
       } else {
         // throw new Error(data.error);
       }
@@ -182,6 +153,8 @@ export default function TraineesPage() {
       setIsAssigning(false);
     }
   };
+
+  console.log(trainees);
 
   const getAssignedModules = async (traineeId: string) => {
     try {
@@ -354,13 +327,37 @@ export default function TraineesPage() {
                 <div className="space-y-4">
                   <div className="flex justify-between text-sm">
                     <span>Progress</span>
-                    <span>{trainee.progressPercentage}%</span>
+                    <span>
+                      {(
+                        (trainee?.Assignment?.filter(
+                          (e: any) => e.status === "COMPLETED"
+                        ).length *
+                          100) /
+                        trainee?.Assignment?.length
+                      ).toFixed(0)}
+                      %
+                    </span>
                   </div>
-                  <Progress value={trainee.progressPercentage} />
+                  <Progress
+                    value={
+                      (trainee?.Assignment?.filter(
+                        (e: any) => e.status === "COMPLETED"
+                      ).length *
+                        100) /
+                      trainee?.Assignment?.length
+                    }
+                  />
 
                   <div className="flex justify-between text-sm text-gray-600">
-                    <span>Completed: {trainee.completedModules}</span>
-                    <span>Total: {trainee.totalModules}</span>
+                    <span>
+                      Completed:{" "}
+                      {
+                        trainee?.Assignment?.filter(
+                          (e: any) => e.status === "COMPLETED"
+                        ).length
+                      }
+                    </span>
+                    <span>Total: {trainee?.Assignment?.length}</span>
                   </div>
 
                   <Badge

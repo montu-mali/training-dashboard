@@ -31,6 +31,7 @@ export async function POST(request: NextRequest) {
   try {
     const { moduleIds, traineeId, instructorId } = await request.json();
 
+    // Basic validation
     if (
       !Array.isArray(moduleIds) ||
       moduleIds.length === 0 ||
@@ -44,25 +45,61 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const newAssignments = moduleIds.map((moduleId) => ({
+    // 1. Get existing assignments for this trainee
+    const existingAssignments = await db.assignment.findMany({
+      where: {
+        traineeId: String(traineeId),
+      },
+      select: {
+        moduleId: true,
+      },
+    });
+
+    const existingModuleIds = existingAssignments.map((a) => a.moduleId);
+
+    // 2. Find moduleIds to remove (those in DB but not in new list)
+    const moduleIdsToRemove = existingModuleIds.filter(
+      (id) => !moduleIds.includes(id)
+    );
+
+    // 3. Delete the ones that should be removed
+    if (moduleIdsToRemove.length > 0) {
+      await db.assignment.deleteMany({
+        where: {
+          traineeId: String(traineeId),
+          moduleId: { in: moduleIdsToRemove },
+        },
+      });
+    }
+
+    // 4. Find moduleIds to add (those in new list but not already in DB)
+    const moduleIdsToAdd = moduleIds.filter(
+      (id: string) => !existingModuleIds.includes(id)
+    );
+
+    const newAssignments = moduleIdsToAdd.map((moduleId: string) => ({
       moduleId: String(moduleId),
       traineeId: String(traineeId),
       instructorId: String(instructorId),
     }));
 
-    const addAssignments = await db.assignment.createMany({
-      data: newAssignments,
-    });
+    // 5. Create new assignments
+    if (newAssignments.length > 0) {
+      await db.assignment.createMany({
+        data: newAssignments,
+      });
+    }
 
     return NextResponse.json({
       success: true,
-      count: addAssignments.count,
+      added: newAssignments.length,
+      removed: moduleIdsToRemove.length,
       assignments: newAssignments,
     });
   } catch (error) {
     console.error("Create assignments error:", error);
     return NextResponse.json(
-      { error: "Failed to create assignments" },
+      { error: "Failed to update assignments" },
       { status: 500 }
     );
   }
@@ -106,18 +143,16 @@ export async function PUT(request: NextRequest) {
   }
 }
 
+// const incomingVariantIds = variants
+//     .filter((v: Variant) => v.id)
+//     .map((v: Variant) => v.id as string);
 
-
-  // const incomingVariantIds = variants
-  //     .filter((v: Variant) => v.id)
-  //     .map((v: Variant) => v.id as string);
-
-  //   // Delete removed variants
-  //   await db.variants.deleteMany({
-  //     where: {
-  //       productId: productId,
-  //       NOT: {
-  //         id: { in: incomingVariantIds },
-  //       },
-  //     },
-  //   });
+//   // Delete removed variants
+//   await db.variants.deleteMany({
+//     where: {
+//       productId: productId,
+//       NOT: {
+//         id: { in: incomingVariantIds },
+//       },
+//     },
+//   });
