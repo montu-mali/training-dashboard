@@ -1,174 +1,228 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useEffect, useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { User, Lock, Mail, Save, Eye, EyeOff, Shield, Loader2 } from "lucide-react"
-import { useAuth } from "@/lib/auth-context"
-import { useToast } from "@/hooks/use-toast"
+import { use, useEffect, useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  User,
+  Lock,
+  Mail,
+  Save,
+  Eye,
+  EyeOff,
+  Shield,
+  Loader2,
+} from "lucide-react";
+import { useAuth } from "@/lib/auth-context";
+import { useToast } from "@/hooks/use-toast";
 import Cookies from "js-cookie";
-import { useRouter } from "next/navigation"
-interface CredentialData {
-  name: string
-  email: string
-  currentPassword: string
-  newPassword: string
-  confirmPassword: string
+import { useRouter } from "next/navigation";
+import axios from "axios";
+import validatePassword from "@/lib/validatePassword";
+import { decrypt } from "@/lib/data-fetching";
+interface CredentialProData {
+  name: string;
+  email: string;
+}
+interface CredentialPassData {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
+interface User {
+  name: string;
+  email: string;
+  createdAt: string;
+  role: "INSTRUCTOR" | "TRAINEE" | "ADMIN";
+  isActive: boolean;
 }
 
 export function CredentialManager() {
-  const { user } = useAuth()
-  const { toast } = useToast()
-    const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false)
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const router = useRouter();
+  const [profileData, setProfileData] = useState<User>();
+  const [isLoading, setIsLoading] = useState(false);
+  const [userTokan, setUserTokan] = useState("");
+  const [validationMessage, setValidationMessage] = useState<string | null>("");
   const [showPasswords, setShowPasswords] = useState({
     current: false,
     new: false,
     confirm: false,
-  })
-  const [formData, setFormData] = useState<CredentialData>({
-    name: user?.name || "",
-    email: user?.email || "",
+  });
+  const [message, setMessage] = useState("");
+  const [emailMessage, setEmailMessage] = useState("");
+  const [formData, setFormData] = useState<CredentialProData>({
+    name: profileData?.name || "",
+    email: profileData?.email || "",
+  });
+
+  const [passData, setPassData] = useState<CredentialPassData>({
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
-  })
-  const [errors, setErrors] = useState<Partial<CredentialData>>({})
+  });
+  // const [errors, setErrors] = useState<Partial<CredentialPassData>>({});
 
- useEffect(() => {
-    const tokanId = Cookies.get("userTokan") as string;
+  useEffect(() => {
+    const tokanId = Cookies.get("instructorTokan") as string;
     if (!tokanId) {
       router.push("/login");
     }
+    setUserTokan(tokanId);
     if (tokanId) {
-      // getOrderData(tokanId);
-      fetchAssignedModules(tokanId);
+      getUserData(tokanId);
     }
   }, []);
 
-
-
-  const validateForm = () => {
-    const newErrors: Partial<CredentialData> = {}
-
-    if (!formData.name.trim()) {
-      newErrors.name = "Name is required"
-    }
-
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required"
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Email is invalid"
-    }
-
-    if (formData.newPassword) {
-      if (!formData.currentPassword) {
-        newErrors.currentPassword = "Current password is required to change password"
+  const getUserData = async (tokanId: any) => {
+    try {
+      if (tokanId) {
+        const response = await axios.get(
+          `/api/users?profileTokanId=${tokanId}`
+        );
+        setProfileData(response.data);
+        setFormData({
+          name: response?.data?.name || "",
+          email: response?.data?.email || "",
+        });
       }
-      if (formData.newPassword.length < 6) {
-        newErrors.newPassword = "New password must be at least 6 characters"
-      }
-      if (formData.newPassword !== formData.confirmPassword) {
-        newErrors.confirmPassword = "Passwords do not match"
-      }
+    } catch (err) {
+      console.error("something wrong", err);
+    } finally {
+      // setLoder(false);
+    }
+  };
+
+  const handlePasswordUpdate = async (e: any) => {
+    e.preventDefault();
+    setMessage("");
+    if (passData.newPassword !== passData.confirmPassword) {
+      toast({
+        title: "Passwords don't match",
+        description: "New password and confirm password must match.",
+        variant: "destructive",
+      });
+      return;
     }
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setIsLoading(true);
 
-  const handleProfileUpdate = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!validateForm()) {
-      return
-    }
-
-    setIsLoading(true)
+    const data = {
+      userTokan,
+      password: passData.currentPassword,
+      newPassword: passData.newPassword,
+    };
 
     try {
-      const updateData: any = {
-        userId: user?.id,
-        name: formData.name,
-        email: formData.email,
-      }
+      const response = await axios.post("/api/users/update/password", data);
 
-      if (formData.newPassword) {
-        updateData.currentPassword = formData.currentPassword
-        updateData.newPassword = formData.newPassword
-      }
-
-      const response = await fetch("/api/users", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updateData),
-      })
-
-      const data = await response.json()
-
-      if (response.ok) {
+      if (response.data.success) {
         toast({
-          title: "Success",
-          description: "Your credentials have been updated successfully",
-        })
+          title: "Password updated",
+          description: "Your password has been changed successfully.",
+        });
 
-        // Clear password fields
-        setFormData((prev) => ({
-          ...prev,
+        setPassData({
           currentPassword: "",
           newPassword: "",
           confirmPassword: "",
-        }))
+        });
+      }
+      if (!response.data.success) {
+        setMessage(response.data.message);
+      }
+    } catch (error) {
+      toast({
+        title: "Update failed",
+        description:
+          "There was a problem updating your password. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-        // Update auth context if needed
-        // You might want to refresh the user data here
-      } else {
-        throw new Error(data.error || "Failed to update credentials")
+  const handleProfileUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const updateData: any = {
+        userId: decrypt(userTokan),
+        name: formData.name,
+        email: formData.email,
+      };
+
+      console.log(updateData)
+
+      const response = await axios.put("/api/users/update/profile_data", {
+        updateData,
+      });
+
+      console.log(response);
+
+      if (response.data.success) {
+        toast({
+          title: "Success",
+          description: "Your credentials have been updated successfully",
+        });
+      }
+      if (!response.data.success) {
+        setEmailMessage(response.data.error);
       }
     } catch (error: any) {
       toast({
         title: "Error",
         description: error.message || "Failed to update credentials",
         variant: "destructive",
-      })
+      });
+      console.log(error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const togglePasswordVisibility = (field: keyof typeof showPasswords) => {
     setShowPasswords((prev) => ({
       ...prev,
       [field]: !prev[field],
-    }))
-  }
+    }));
+  };
 
-  const getPasswordStrength = (password: string) => {
-    if (password.length === 0) return { strength: 0, label: "" }
-    if (password.length < 6) return { strength: 25, label: "Weak" }
-    if (password.length < 8) return { strength: 50, label: "Fair" }
-    if (password.length < 12 && /[A-Z]/.test(password) && /[0-9]/.test(password)) {
-      return { strength: 75, label: "Good" }
-    }
-    if (password.length >= 12 && /[A-Z]/.test(password) && /[0-9]/.test(password) && /[^A-Za-z0-9]/.test(password)) {
-      return { strength: 100, label: "Strong" }
-    }
-    return { strength: 60, label: "Fair" }
-  }
+  const handleValidation = () => {
+    const message = validatePassword(passData.newPassword);
+    setValidationMessage(message);
+  };
 
-  const passwordStrength = getPasswordStrength(formData.newPassword)
+  useEffect(() => {
+    if (passData.newPassword !== null && passData.newPassword !== "") {
+      handleValidation();
+    }
+  }, [passData.newPassword]);
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-gray-900">Account Settings</h2>
-        <p className="text-gray-600">Manage your account credentials and security settings</p>
+        <p className="text-gray-600">
+          Manage your account credentials and security settings
+        </p>
       </div>
 
       <form onSubmit={handleProfileUpdate} className="space-y-6">
@@ -188,11 +242,12 @@ export function CredentialManager() {
                 <Input
                   id="name"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
                   disabled={isLoading}
-                  className={errors.name ? "border-red-500" : ""}
+                  className={!formData.name ? "border-red-500" : ""}
                 />
-                {errors.name && <p className="text-sm text-red-600">{errors.name}</p>}
               </div>
 
               <div className="space-y-2">
@@ -203,40 +258,71 @@ export function CredentialManager() {
                     id="email"
                     type="email"
                     value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
                     disabled={isLoading}
-                    className={`pl-10 ${errors.email ? "border-red-500" : ""}`}
+                    className={`pl-10 ${emailMessage ? "border-red-500" : ""}`}
                   />
                 </div>
-                {errors.email && <p className="text-sm text-red-600">{errors.email}</p>}
+                {emailMessage && (
+                  <p className="text-sm text-red-600">{emailMessage}</p>
+                )}
               </div>
             </div>
 
             <div className="flex items-center space-x-2 p-3 bg-blue-50 rounded-lg">
               <Shield className="h-4 w-4 text-blue-600" />
               <span className="text-sm text-blue-800">
-                Role: <strong className="capitalize">{user?.role}</strong>
+                Role:{" "}
+                <strong className="capitalize">{profileData?.role}</strong>
               </span>
             </div>
           </CardContent>
+          <CardFooter>
+            <div className="flex justify-end">
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="min-w-[120px]"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="mr-2 h-4 w-4" />
+                    Save Changes
+                  </>
+                )}
+              </Button>
+            </div>
+          </CardFooter>
         </Card>
+      </form>
+      <Separator />
 
-        <Separator />
+      {/* Password Security */}
 
-        {/* Password Security */}
+      <form onSubmit={handlePasswordUpdate} className="space-y-6">
         <Card>
           <CardHeader>
             <div className="flex items-center space-x-2">
               <Lock className="h-5 w-5" />
               <CardTitle>Password Security</CardTitle>
             </div>
-            <CardDescription>Change your password to keep your account secure</CardDescription>
+            <CardDescription>
+              Change your password to keep your account secure
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <Alert>
               <Shield className="h-4 w-4" />
               <AlertDescription>
-                Leave password fields empty if you don't want to change your password.
+                Leave password fields empty if you don't want to change your
+                password.
               </AlertDescription>
             </Alert>
 
@@ -246,10 +332,15 @@ export function CredentialManager() {
                 <Input
                   id="currentPassword"
                   type={showPasswords.current ? "text" : "password"}
-                  value={formData.currentPassword}
-                  onChange={(e) => setFormData({ ...formData, currentPassword: e.target.value })}
+                  value={passData.currentPassword}
+                  onChange={(e) =>
+                    setPassData({
+                      ...passData,
+                      currentPassword: e.target.value,
+                    })
+                  }
                   disabled={isLoading}
-                  className={errors.currentPassword ? "border-red-500" : ""}
+                  // className={errors.currentPassword ? "border-red-500" : ""}
                 />
                 <Button
                   type="button"
@@ -258,10 +349,14 @@ export function CredentialManager() {
                   className="absolute right-0 top-0 h-full px-3"
                   onClick={() => togglePasswordVisibility("current")}
                 >
-                  {showPasswords.current ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showPasswords.current ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
                 </Button>
               </div>
-              {errors.currentPassword && <p className="text-sm text-red-600">{errors.currentPassword}</p>}
+              {message && <p className="text-sm text-red-600">{message}</p>}
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
@@ -271,10 +366,12 @@ export function CredentialManager() {
                   <Input
                     id="newPassword"
                     type={showPasswords.new ? "text" : "password"}
-                    value={formData.newPassword}
-                    onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
+                    value={passData.newPassword}
+                    onChange={(e) =>
+                      setPassData({ ...passData, newPassword: e.target.value })
+                    }
                     disabled={isLoading}
-                    className={errors.newPassword ? "border-red-500" : ""}
+                    // className={errors.newPassword ? "border-red-500" : ""}
                   />
                   <Button
                     type="button"
@@ -283,40 +380,13 @@ export function CredentialManager() {
                     className="absolute right-0 top-0 h-full px-3"
                     onClick={() => togglePasswordVisibility("new")}
                   >
-                    {showPasswords.new ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPasswords.new ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </Button>
                 </div>
-                {formData.newPassword && (
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-xs">
-                      <span>Password strength</span>
-                      <span
-                        className={`font-medium ${
-                          passwordStrength.strength >= 75
-                            ? "text-green-600"
-                            : passwordStrength.strength >= 50
-                              ? "text-yellow-600"
-                              : "text-red-600"
-                        }`}
-                      >
-                        {passwordStrength.label}
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className={`h-2 rounded-full transition-all ${
-                          passwordStrength.strength >= 75
-                            ? "bg-green-500"
-                            : passwordStrength.strength >= 50
-                              ? "bg-yellow-500"
-                              : "bg-red-500"
-                        }`}
-                        style={{ width: `${passwordStrength.strength}%` }}
-                      />
-                    </div>
-                  </div>
-                )}
-                {errors.newPassword && <p className="text-sm text-red-600">{errors.newPassword}</p>}
               </div>
 
               <div className="space-y-2">
@@ -325,10 +395,15 @@ export function CredentialManager() {
                   <Input
                     id="confirmPassword"
                     type={showPasswords.confirm ? "text" : "password"}
-                    value={formData.confirmPassword}
-                    onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                    value={passData.confirmPassword}
+                    onChange={(e) =>
+                      setPassData({
+                        ...passData,
+                        confirmPassword: e.target.value,
+                      })
+                    }
                     disabled={isLoading}
-                    className={errors.confirmPassword ? "border-red-500" : ""}
+                    // className={errors.confirmPassword ? "border-red-500" : ""}
                   />
                   <Button
                     type="button"
@@ -337,42 +412,51 @@ export function CredentialManager() {
                     className="absolute right-0 top-0 h-full px-3"
                     onClick={() => togglePasswordVisibility("confirm")}
                   >
-                    {showPasswords.confirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPasswords.confirm ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </Button>
                 </div>
-                {errors.confirmPassword && <p className="text-sm text-red-600">{errors.confirmPassword}</p>}
               </div>
             </div>
-
-            <div className="text-xs text-gray-600 space-y-1">
-              <p>Password requirements:</p>
-              <ul className="list-disc list-inside space-y-1 ml-2">
-                <li>At least 6 characters long</li>
-                <li>Include uppercase and lowercase letters</li>
-                <li>Include at least one number</li>
-                <li>Include special characters for stronger security</li>
-              </ul>
-            </div>
+            <p className="text-xs text-muted-foreground">
+              {validationMessage ? (
+                <span className="text-red-600">{validationMessage}</span>
+              ) : (
+                "Password must be at least 8 characters long and include a number and a special character."
+              )}
+            </p>
           </CardContent>
+          <CardFooter>
+            <div className="flex justify-end">
+              <Button
+                type="submit"
+                disabled={
+                  passData.newPassword !== passData.confirmPassword ||
+                  !passData.currentPassword
+                }
+                className="min-w-[120px]"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="mr-2 h-4 w-4" />
+                    Save Changes
+                  </>
+                )}
+              </Button>
+            </div>
+          </CardFooter>
         </Card>
 
         {/* Save Button */}
-        <div className="flex justify-end">
-          <Button type="submit" disabled={isLoading} className="min-w-[120px]">
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Saving...
-              </>
-            ) : (
-              <>
-                <Save className="mr-2 h-4 w-4" />
-                Save Changes
-              </>
-            )}
-          </Button>
-        </div>
       </form>
     </div>
-  )
+  );
 }

@@ -7,7 +7,6 @@ export async function POST(req: Request) {
   try {
     const { email, password } = await req.json();
 
-    console.log("Login attempt for email:", email);
 
     if (!email || !password) {
       return NextResponse.json(
