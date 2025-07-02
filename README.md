@@ -10,7 +10,6 @@ TraineeHub is a full-stack training management system designed to streamline the
 - TypeScript
 - MongoDB
 - Prisma ORM
-- JWT Authentication
 - Tailwind CSS
 - Deployment: Vercel
 
@@ -40,8 +39,7 @@ TraineeHub is a full-stack training management system designed to streamline the
 ## 🌐 Live Demo
 
 **Deployed on Vercel:**  
-[https://traineehub.vercel.app](https://traineehub.vercel.app)  
-*(Replace with your actual link if different)*
+[https://traininghub-two.vercel.app](https://traininghub-two.vercel.app)  
 
 ---
 
@@ -50,5 +48,9 @@ TraineeHub is a full-stack training management system designed to streamline the
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/traineehub.git
-cd traineehub
+git clone https://github.com/montu-mali/training-dashboard  
+cd training-dashboard
+npm install
+npm run dev
+
+
