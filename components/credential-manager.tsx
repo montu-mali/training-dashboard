@@ -159,44 +159,38 @@ export function CredentialManager() {
   };
 
   const handleProfileUpdate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+  e.preventDefault();
+  setIsLoading(true);
 
-    try {
-      const updateData: any = {
-        userId: decrypt(userTokan),
-        name: formData.name,
-        email: formData.email,
-      };
+  try {
+    const updateData = {
+      userId: decrypt(userTokan),
+      name: formData.name,
+      email: formData.email,
+    };
 
-      console.log(updateData)
+    const response = await axios.put("/api/users/update/profile_data", updateData);
 
-      const response = await axios.put("/api/users/update/profile_data", {
-        updateData,
-      });
-
-      console.log(response);
-
-      if (response.data.success) {
-        toast({
-          title: "Success",
-          description: "Your credentials have been updated successfully",
-        });
-      }
-      if (!response.data.success) {
-        setEmailMessage(response.data.error);
-      }
-    } catch (error: any) {
+    if (response.data.success) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to update credentials",
-        variant: "destructive",
+        title: "Success",
+        description: "Your credentials have been updated successfully",
       });
-      console.log(error);
-    } finally {
-      setIsLoading(false);
+    } else {
+      setEmailMessage(response.data.error);
     }
-  };
+  } catch (error: any) {
+    toast({
+      title: "Error",
+      description: error.message || "Failed to update credentials",
+      variant: "destructive",
+    });
+    console.log(error);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   const togglePasswordVisibility = (field: keyof typeof showPasswords) => {
     setShowPasswords((prev) => ({
