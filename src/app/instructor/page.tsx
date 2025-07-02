@@ -2,17 +2,17 @@
 
 import type React from "react";
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/src/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+} from "@/src/components/ui/card";
+import { Input } from "@/src/components/ui/input";
+import { Label } from "@/src/components/ui/label";
+import { Textarea } from "@/src/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -20,7 +20,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from "@/src/components/ui/dialog";
 import {
   Plus,
   Edit,
@@ -31,10 +31,10 @@ import {
   Users,
   Loader2,
 } from "lucide-react";
-import { ProtectedRoute } from "@/components/protected-route";
-import { DashboardLayout } from "@/components/dashboard-layout";
+import { ProtectedRoute } from "@/src/components/protected-route";
+import { DashboardLayout } from "@/src/components/dashboard-layout";
 import type { Module } from "@/src/lib/types";
-import { Progress } from "@/components/ui/progress";
+import { Progress } from "@/src/components/ui/progress";
 import { useToast } from "@/src/hooks/use-toast";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";

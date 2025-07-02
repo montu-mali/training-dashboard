@@ -1,8 +1,8 @@
 "use client"
 
-import { ProtectedRoute } from "@/components/protected-route"
-import { DashboardLayout } from "@/components/dashboard-layout"
-import { AnalyticsCharts } from "@/components/analytics-charts"
+import { AnalyticsCharts } from "@/src/components/analytics-charts"
+import { DashboardLayout } from "@/src/components/dashboard-layout"
+import { ProtectedRoute } from "@/src/components/protected-route"
 
 export default function AnalyticsPage() {
   return (

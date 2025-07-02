@@ -1,8 +1,8 @@
 "use client"
 
-import { ProtectedRoute } from "@/components/protected-route"
-import { DashboardLayout } from "@/components/dashboard-layout"
-import { ProcessChart } from "@/components/process-chart"
+import { ProtectedRoute } from "@/src/components/protected-route"
+import { DashboardLayout } from "@/src/components/dashboard-layout"
+import { ProcessChart } from "@/src/components/process-chart"
 
 export default function ProcessChartPage() {
   return (

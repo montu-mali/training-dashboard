@@ -1,7 +1,8 @@
 "use client"
 
-import { ProtectedRoute } from "@/components/protected-route"
-import { RoleBasedDashboard } from "@/components/role-based-dashboard"
+import { ProtectedRoute } from "@/src/components/protected-route"
+import { RoleBasedDashboard } from "@/src/components/role-based-dashboard"
+
 
 export default function DashboardPage() {
   return (

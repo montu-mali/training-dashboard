@@ -1,9 +1,9 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
-import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/components/ui/card"
+import { Progress } from "@/src/components/ui/progress"
+import { Badge } from "@/src/components/ui/badge"
 import {
   BarChart,
   Bar,
@@ -19,8 +19,8 @@ import {
   AreaChart,
 } from "recharts"
 import { Users, BookOpen, TrendingUp, Award, Calendar, Target } from "lucide-react"
-import { ProtectedRoute } from "@/components/protected-route"
-import { DashboardLayout } from "@/components/dashboard-layout"
+import { ProtectedRoute } from "@/src/components/protected-route"
+import { DashboardLayout } from "@/src/components/dashboard-layout"
 import type { TraineeWithProgress } from "@/src/lib/types"
 import { users, modules, assignments } from "@/src/lib/database"
 

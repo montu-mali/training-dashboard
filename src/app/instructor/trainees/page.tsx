@@ -1,16 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/src/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
+} from "@/src/components/ui/card";
+import { Badge } from "@/src/components/ui/badge";
+import { Progress } from "@/src/components/ui/progress";
 import {
   Dialog,
   DialogContent,
@@ -18,11 +18,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Checkbox } from "@/components/ui/checkbox";
+} from "@/src/components/ui/dialog";
+import { Checkbox } from "@/src/components/ui/checkbox";
 import { Users, UserPlus, Loader2 } from "lucide-react";
-import { ProtectedRoute } from "@/components/protected-route";
-import { DashboardLayout } from "@/components/dashboard-layout";
+import { ProtectedRoute } from "@/src/components/protected-route";
+import { DashboardLayout } from "@/src/components/dashboard-layout";
 import type { TraineeWithProgress, Module } from "@/src/lib/types";
 import { useAuth } from "@/src/lib/auth-context";
 import { useToast } from "@/src/hooks/use-toast";
