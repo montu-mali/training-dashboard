@@ -1,12 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db/connect";
-import { generateToken } from "@/lib/auth";
 import bcrypt from "bcrypt";
 
-export async function POST(req:  NextRequest) {
+export async function POST(req:NextRequest) {
   try {
     const { email, password } = await req.json();
-
 
     if (!email || !password) {
       return NextResponse.json(
