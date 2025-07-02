@@ -24,9 +24,7 @@ import { useRouter } from "next/navigation";
 export default function TraineeDashboard() {
   const { user } = useAuth();
   const router = useRouter();
-  const [assignedModules, setAssignedModules] = useState<ModuleWithProgress[]>(
-    []
-  );
+  const [assignedModules, setAssignedModules] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [completingModules, setCompletingModules] = useState<Set<string>>(
     new Set()
@@ -47,14 +45,8 @@ export default function TraineeDashboard() {
     if (tokanId) {
       // getOrderData(tokanId);
       fetchAssignedModules(tokanId);
-      console.log(tokanId);
     }
   }, []);
-
-  useEffect(() => {
-    if (user) {
-    }
-  }, [user]);
 
   const fetchAssignedModules = async (tokanId: string) => {
     try {
@@ -67,28 +59,27 @@ export default function TraineeDashboard() {
       const assignmentsData = await assignmentsResponse.data;
       const modulesData = await modulesResponse.data;
 
-      if (assignmentsResponse.data.success && modulesResponse.data.success) {
+      if (assignmentsData.success && modulesData.success) {
         const assignments = assignmentsData.assignments;
         const modules = modulesData.modules;
 
-        const modulesWithProgress = assignments.map((assignment: any) => {
-          const module = modules.find((m: any) => m.id === assignment.moduleId);
-          return {
-            ...module,
-            assignmentId: assignment.id,
-            isCompleted: assignment.isCompleted,
-            completedAt: assignment.completedAt
-              ? new Date(assignment.completedAt)
-              : undefined,
-          };
-        });
+        // const modulesWithProgress = assignments.map((assignment: any) => {
+        //   const module = modules.find((m: any) => m.id === assignment.moduleId);
+        //   return {
+        //     ...module,
+        //     assignmentId: assignment.id,
+        //     completedAt: assignment.completedAt
+        //       ? new Date(assignment.completedAt)
+        //       : undefined,
+        //   };
+        // });
 
-        setAssignedModules(modulesWithProgress);
+        setAssignedModules(assignments);
 
         // Calculate stats
-        const total = modulesWithProgress.length;
-        const completed = modulesWithProgress.filter(
-          (m: any) => m.isCompleted
+        const total = assignmentsData.assignments.length;
+        const completed = assignmentsData.assignments.filter(
+          (e: any) => e.status === "COMPLETED"
         ).length;
         const pending = total - completed;
         const progressPercentage =
@@ -112,46 +103,15 @@ export default function TraineeDashboard() {
     setCompletingModules((prev) => new Set(prev).add(moduleId));
 
     try {
-      const response = await fetch("/api/assignments", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          assignmentId,
-          isCompleted: true,
-        }),
+      const response = await axios.put("/api/assignments", {
+        assignmentId,
+        status: "COMPLETE",
       });
-
-      const data = await response.json();
-      if (response.ok) {
-        setAssignedModules((prev) =>
-          prev.map((module) =>
-            module.id === moduleId
-              ? { ...module, isCompleted: true, completedAt: new Date() }
-              : module
-          )
-        );
-
-        // Update stats
-        setStats((prev) => {
-          const newCompleted = prev.completed + 1;
-          const newPending = prev.pending - 1;
-          const newProgressPercentage =
-            prev.total > 0 ? Math.round((newCompleted / prev.total) * 100) : 0;
-
-          return {
-            ...prev,
-            completed: newCompleted,
-            pending: newPending,
-            progressPercentage: newProgressPercentage,
-          };
-        });
-
+      if (response.data.success) {
         toast({
           title: "Congratulations!",
           description: "Module completed successfully",
         });
-      } else {
-        throw new Error(data.error);
       }
     } catch (error: any) {
       toast({
@@ -170,159 +130,155 @@ export default function TraineeDashboard() {
 
   if (isLoading) {
     return (
-      <ProtectedRoute requiredRole="trainee">
-        <DashboardLayout>
-          <div className="flex items-center justify-center min-h-[400px]">
-            <Loader2 className="h-8 w-8 animate-spin" />
-          </div>
-        </DashboardLayout>
-      </ProtectedRoute>
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      </DashboardLayout>
     );
   }
 
   return (
-    <ProtectedRoute requiredRole="trainee">
-      <DashboardLayout>
-        <div className="space-y-6">
-          <div>
-            <h2 className="text-3xl font-bold tracking-tight">
-              My Training Modules
-            </h2>
-            <p className="text-muted-foreground">
-              Track your progress and complete assigned modules
-            </p>
-          </div>
-
-          {/* Progress Overview */}
-          <div className="grid gap-4 md:grid-cols-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Total Modules
-                </CardTitle>
-                <BookOpen className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.total}</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Completed</CardTitle>
-                <CheckCircle className="h-4 w-4 text-green-600" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-green-600">
-                  {stats.completed}
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Pending</CardTitle>
-                <Clock className="h-4 w-4 text-orange-600" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-orange-600">
-                  {stats.pending}
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Progress</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {stats.progressPercentage}%
-                </div>
-                <Progress value={stats.progressPercentage} className="mt-2" />
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Modules List */}
-          <div className="space-y-4">
-            <h3 className="text-xl font-semibold">Assigned Modules</h3>
-
-            {assignedModules.length > 0 ? (
-              <div className="grid gap-4 md:grid-cols-2">
-                {assignedModules.map((module: any) => (
-                  <Card
-                    key={module.id}
-                    className={
-                      module.isCompleted ? "border-green-200 bg-green-50" : ""
-                    }
-                  >
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center space-x-2">
-                          <BookOpen
-                            className={`h-6 w-6 ${
-                              module.isCompleted
-                                ? "text-green-600"
-                                : "text-blue-600"
-                            }`}
-                          />
-                          {module.isCompleted && (
-                            <CheckCircle className="h-5 w-5 text-green-600" />
-                          )}
-                        </div>
-                        <Badge
-                          variant={module.isCompleted ? "default" : "secondary"}
-                        >
-                          {module.isCompleted ? "Completed" : "Pending"}
-                        </Badge>
-                      </div>
-                      <CardTitle className="text-lg">{module.title}</CardTitle>
-                      <CardDescription>{module.description}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-gray-600 mb-4 line-clamp-3">
-                        {module.content}
-                      </p>
-
-                      {module.isCompleted ? (
-                        <div className="text-sm text-green-600">
-                          ✓ Completed on{" "}
-                          {module.completedAt?.toLocaleDateString()}
-                        </div>
-                      ) : (
-                        <Button
-                          onClick={() =>
-                            handleMarkComplete(module.id, module.assignmentId)
-                          }
-                          className="w-full"
-                          disabled={completingModules.has(module.id)}
-                        >
-                          {completingModules.has(module.id) ? (
-                            <>
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              Completing...
-                            </>
-                          ) : (
-                            "Mark as Complete"
-                          )}
-                        </Button>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <BookOpen className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-2 text-sm font-medium text-gray-900">
-                  No modules assigned
-                </h3>
-                <p className="mt-1 text-sm text-gray-500">
-                  Your instructor hasn't assigned any modules yet.
-                </p>
-              </div>
-            )}
-          </div>
+    <DashboardLayout>
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">
+            My Training Modules
+          </h2>
+          <p className="text-muted-foreground">
+            Track your progress and complete assigned modules
+          </p>
         </div>
-      </DashboardLayout>
-    </ProtectedRoute>
+
+        {/* Progress Overview */}
+        <div className="grid gap-4 md:grid-cols-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Total Modules
+              </CardTitle>
+              <BookOpen className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.total}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Completed</CardTitle>
+              <CheckCircle className="h-4 w-4 text-green-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">
+                {stats.completed}
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Pending</CardTitle>
+              <Clock className="h-4 w-4 text-orange-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-orange-600">
+                {stats.pending}
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Progress</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {stats.progressPercentage}%
+              </div>
+              <Progress value={stats.progressPercentage} className="mt-2" />
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Modules List */}
+        <div className="space-y-4">
+          <h3 className="text-xl font-semibold">Assigned Modules</h3>
+
+          {assignedModules.length > 0 ? (
+            <div className="grid gap-4 md:grid-cols-2">
+              {assignedModules.map((module: any) => (
+                <Card
+                  key={module.id}
+                  className={
+                    module.isCompleted ? "border-green-200 bg-green-50" : ""
+                  }
+                >
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center space-x-2">
+                        <BookOpen
+                          className={`h-6 w-6 ${
+                            module.isCompleted
+                              ? "text-green-600"
+                              : "text-blue-600"
+                          }`}
+                        />
+                        {module.isCompleted && (
+                          <CheckCircle className="h-5 w-5 text-green-600" />
+                        )}
+                      </div>
+                      <Badge
+                        variant={module.isCompleted ? "default" : "secondary"}
+                      >
+                        {module.isCompleted ? "Completed" : "Pending"}
+                      </Badge>
+                    </div>
+                    <CardTitle className="text-lg">{module.title}</CardTitle>
+                    <CardDescription>{module.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-gray-600 mb-4 line-clamp-3">
+                      {module.content}
+                    </p>
+
+                    {module.isCompleted ? (
+                      <div className="text-sm text-green-600">
+                        ✓ Completed on{" "}
+                        {module.completedAt?.toLocaleDateString()}
+                      </div>
+                    ) : (
+                      <Button
+                        onClick={() =>
+                          handleMarkComplete(module.id, module.assignmentId)
+                        }
+                        className="w-full"
+                        disabled={completingModules.has(module.id)}
+                      >
+                        {completingModules.has(module.id) ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Completing...
+                          </>
+                        ) : (
+                          "Mark as Complete"
+                        )}
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <BookOpen className="mx-auto h-12 w-12 text-gray-400" />
+              <h3 className="mt-2 text-sm font-medium text-gray-900">
+                No modules assigned
+              </h3>
+              <p className="mt-1 text-sm text-gray-500">
+                Your instructor hasn't assigned any modules yet.
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    </DashboardLayout>
   );
 }

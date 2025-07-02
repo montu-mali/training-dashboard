@@ -75,7 +75,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     }
   };
 
-
   const navigation =
     profileData?.role === "INSTRUCTOR"
       ? [

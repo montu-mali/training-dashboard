@@ -38,7 +38,7 @@ export default function LoginPage() {
       const encryptedId = encrypt(id);
       if (encryptedId) {
         Cookies.set(
-          role === "INSTRUCTOR" ? "instructorTokan" : "userTokan",
+          role === "INSTRUCTOR" ? "instructorTokan" : "instructorTokan",
           encryptedId,
           { expires: 15 }
         );

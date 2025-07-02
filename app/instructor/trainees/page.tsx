@@ -115,7 +115,6 @@ export default function TraineesPage() {
   const fetchModules = async (tokanId: string) => {
     try {
       const response = await axios.get(`/api/modules?instructorId=${tokanId}`);
-      console.log(response.data.instructorModules);
       setAvailableModules(response.data.instructorModules);
     } catch (error) {
       console.error("Failed to fetch modules:", error);

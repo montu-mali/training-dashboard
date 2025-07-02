@@ -2,17 +2,46 @@ import { type NextRequest, NextResponse } from "next/server";
 import { assignments } from "@/lib/database";
 import type { Assignment } from "@/lib/types";
 import { db } from "@/db/connect";
+import { decrypt } from "@/lib/data-fetching";
 
 export async function GET(request: NextRequest) {
   try {
     const url = new URL(request.url);
-    const traineeId = url.searchParams.get("traineeId");
+    const traineeTokan = url.searchParams.get("traineeId") as string;
     const instructorId = url.searchParams.get("instructorId");
-
+    const traineeId = decrypt(traineeTokan);
     let assignments;
 
     if (traineeId) {
-      assignments = await db.assignment.findMany({ where: { traineeId } });
+      // assignments = await db.assignment.findMany({ where: { traineeId } });
+      const TaineeAssignments = await db.assignment.findMany({
+        where: { traineeId },
+      });
+
+      if (TaineeAssignments.length === 0) {
+        return NextResponse.json({ data: [] }); // No assignments
+      }
+
+      const moduleIds = TaineeAssignments.map((a) => a.moduleId);
+
+      const modules = await db.module.findMany({
+        where: { id: { in: moduleIds } },
+      });
+
+      assignments = TaineeAssignments.map((assignment) => {
+        const module = modules.find((m) => m.id === assignment.moduleId);
+
+        return {
+          assignmentId: assignment.id,
+          moduleId: assignment.moduleId,
+          status: assignment.status,
+          // Add whatever fields you want
+          title: module?.title,
+          description: module?.description,
+          content: module?.content,
+          estimatedDuration: module?.estimatedDuration,
+        };
+      });
     } else if (instructorId) {
       assignments = await db.assignment.findMany({ where: { instructorId } });
     }

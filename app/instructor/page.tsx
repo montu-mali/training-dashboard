@@ -109,7 +109,6 @@ export default function InstructorDashboard() {
   const fetchModules = async (tokanId: string) => {
     try {
       const response = await axios.get(`/api/modules?instructorId=${tokanId}`);
-      console.log(response.data.instructorModules);
       setInstructorModules(response.data.instructorModules);
       if (response) {
         // setModuleList(data.modules);

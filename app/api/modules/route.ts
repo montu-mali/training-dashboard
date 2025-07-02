@@ -16,11 +16,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         success: true,
         instructorModules,
-        instructorId,
       });
     }
 
-    // return NextResponse.json({ modules });
+    const instructorModules = await db.module.findMany({});
+
+    return NextResponse.json({ success: true, instructorModules });
   } catch (error) {
     console.error("Get modules error:", error);
     return NextResponse.json(
