@@ -35,6 +35,8 @@ export async function GET(request: NextRequest) {
           assignmentId: assignment.id,
           moduleId: assignment.moduleId,
           status: assignment.status,
+          createdAt: assignment.createdAt,
+          updatedAt: assignment.updatedAt,
           // Add whatever fields you want
           title: module?.title,
           description: module?.description,
@@ -134,34 +136,21 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function PUT(request: NextRequest) {
+export async function PUT(req: Request) {
   try {
-    const { assignmentId, isCompleted } = await request.json();
+    const { assignmentId, status } = await req.json();
 
-    if (!assignmentId || typeof isCompleted !== "boolean") {
+    if (!assignmentId || status !== "COMPLETED") {
       return NextResponse.json({ error: "Invalid data" }, { status: 400 });
     }
 
-    const assignmentIndex = assignments.findIndex(
-      (assignment) => assignment.id === assignmentId
-    );
-    if (assignmentIndex === -1) {
-      return NextResponse.json(
-        { error: "Assignment not found" },
-        { status: 404 }
-      );
-    }
-
-    assignments[assignmentIndex].isCompleted = isCompleted;
-    if (isCompleted) {
-      assignments[assignmentIndex].completedAt = new Date();
-    } else {
-      delete assignments[assignmentIndex].completedAt;
-    }
+    const completeAssign = await db.assignment.update({
+      where: { id: assignmentId },
+      data: { status },
+    });
 
     return NextResponse.json({
       success: true,
-      assignment: assignments[assignmentIndex],
     });
   } catch (error) {
     console.error("Update assignment error:", error);
@@ -171,17 +160,3 @@ export async function PUT(request: NextRequest) {
     );
   }
 }
-
-// const incomingVariantIds = variants
-//     .filter((v: Variant) => v.id)
-//     .map((v: Variant) => v.id as string);
-
-//   // Delete removed variants
-//   await db.variants.deleteMany({
-//     where: {
-//       productId: productId,
-//       NOT: {
-//         id: { in: incomingVariantIds },
-//       },
-//     },
-//   });

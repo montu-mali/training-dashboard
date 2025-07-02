@@ -35,13 +35,14 @@ export default function TraineeDashboard() {
     pending: 0,
     progressPercentage: 0,
   });
+  const [userTokan, setUserTokan] = useState("");
 
   useEffect(() => {
     const tokanId = Cookies.get("userTokan") as string;
     if (!tokanId) {
       router.push("/login");
     }
-    // setUserTokan(tokanId);
+    setUserTokan(tokanId);
     if (tokanId) {
       // getOrderData(tokanId);
       fetchAssignedModules(tokanId);
@@ -99,19 +100,18 @@ export default function TraineeDashboard() {
     }
   };
 
-  const handleMarkComplete = async (moduleId: string, assignmentId: string) => {
-    setCompletingModules((prev) => new Set(prev).add(moduleId));
-
+  const handleMarkComplete = async (assignmentId: string) => {
     try {
       const response = await axios.put("/api/assignments", {
         assignmentId,
-        status: "COMPLETE",
+        status: "COMPLETED",
       });
       if (response.data.success) {
         toast({
           title: "Congratulations!",
           description: "Module completed successfully",
         });
+        fetchAssignedModules(userTokan);
       }
     } catch (error: any) {
       toast({
@@ -120,11 +120,6 @@ export default function TraineeDashboard() {
         variant: "destructive",
       });
     } finally {
-      setCompletingModules((prev) => {
-        const newSet = new Set(prev);
-        newSet.delete(moduleId);
-        return newSet;
-      });
     }
   };
 
@@ -216,7 +211,7 @@ export default function TraineeDashboard() {
                       <div className="flex items-center space-x-2">
                         <BookOpen
                           className={`h-6 w-6 ${
-                            module.isCompleted
+                            module?.status === "COMPLETED"
                               ? "text-green-600"
                               : "text-blue-600"
                           }`}
@@ -226,9 +221,15 @@ export default function TraineeDashboard() {
                         )}
                       </div>
                       <Badge
-                        variant={module.isCompleted ? "default" : "secondary"}
+                        variant={
+                          module?.status === "COMPLETED"
+                            ? "default"
+                            : "secondary"
+                        }
                       >
-                        {module.isCompleted ? "Completed" : "Pending"}
+                        {module?.status === "COMPLETED"
+                          ? "Completed"
+                          : "Pending"}
                       </Badge>
                     </div>
                     <CardTitle className="text-lg">{module.title}</CardTitle>
@@ -239,16 +240,13 @@ export default function TraineeDashboard() {
                       {module.content}
                     </p>
 
-                    {module.isCompleted ? (
+                    {module?.status === "COMPLETED" ? (
                       <div className="text-sm text-green-600">
-                        ✓ Completed on{" "}
-                        {module.completedAt?.toLocaleDateString()}
+                        ✓ Completed on {module.updatedAt.slice(0, 10)}
                       </div>
                     ) : (
                       <Button
-                        onClick={() =>
-                          handleMarkComplete(module.id, module.assignmentId)
-                        }
+                        onClick={() => handleMarkComplete(module.assignmentId)}
                         className="w-full"
                         disabled={completingModules.has(module.id)}
                       >
