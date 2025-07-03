@@ -19,7 +19,6 @@ import {
   AreaChart,
 } from "recharts"
 import { Users, BookOpen, TrendingUp, Award, Calendar, Target } from "lucide-react"
-import { ProtectedRoute } from "@/components/protected-route"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import type { TraineeWithProgress } from "@/lib/types"
 import { users, modules, assignments } from "@/lib/database"
@@ -77,7 +76,7 @@ export default function AnalyticsPage() {
     percentage: trainee.progressPercentage,
   }))
 
-  const moduleCompletionData = modules.map((module) => {
+  const moduleCompletionData = modules.map((module:any) => {
     const moduleAssignments = assignments.filter((a) => a.moduleId === module.id)
     const completedCount = moduleAssignments.filter((a) => a.isCompleted).length
     return {
@@ -106,7 +105,6 @@ export default function AnalyticsPage() {
   const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#06b6d4"]
 
   return (
-    <ProtectedRoute requiredRole="instructor">
       <DashboardLayout>
         <div className="space-y-6">
           <div>
@@ -359,6 +357,5 @@ export default function AnalyticsPage() {
           </Card>
         </div>
       </DashboardLayout>
-    </ProtectedRoute>
   )
 }

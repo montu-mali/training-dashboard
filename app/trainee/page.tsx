@@ -12,17 +12,14 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { BookOpen, CheckCircle, Clock, Loader2 } from "lucide-react";
-import { ProtectedRoute } from "@/components/protected-route";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import type { ModuleWithProgress } from "@/lib/types";
-import { useAuth } from "@/lib/auth-context";
 import axios from "axios";
 import { toast } from "@/hooks/use-toast";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 
 export default function TraineeDashboard() {
-  const { user } = useAuth();
   const router = useRouter();
   const [assignedModules, setAssignedModules] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);

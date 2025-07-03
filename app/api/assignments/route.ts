@@ -1,6 +1,4 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { assignments } from "@/lib/database";
-import type { Assignment } from "@/lib/types";
 import { db } from "@/db/connect";
 import { decrypt } from "@/lib/data-fetching";
 

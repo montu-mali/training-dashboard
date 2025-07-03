@@ -20,7 +20,6 @@ import {
 } from "recharts"
 import { Users, BookOpen, TrendingUp, Shield, Settings, UserPlus, Activity } from "lucide-react"
 import { DashboardLayout } from "./dashboard-layout"
-import { useAuth } from "@/lib/auth-context"
 
 interface AdminStats {
   totalUsers: number
@@ -32,7 +31,6 @@ interface AdminStats {
 }
 
 export function AdminDashboard() {
-  const { user } = useAuth()
   const [stats, setStats] = useState<AdminStats>({
     totalUsers: 0,
     totalInstructors: 0,

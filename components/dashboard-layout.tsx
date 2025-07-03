@@ -104,7 +104,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         ]
       : [
           { name: "My Modules", href: "/trainee", icon: BookOpen },
-          { name: "Progress", href: "/trainee/progress", icon: BarChart3 },
+          // { name: "Progress", href: "/trainee/progress", icon: BarChart3 },
           { name: "Process Chart", href: "/process-chart", icon: GitBranch },
         ];
 

@@ -31,7 +31,6 @@ import {
   Users,
   Loader2,
 } from "lucide-react";
-import { ProtectedRoute } from "@/components/protected-route";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import type { Module } from "@/lib/types";
 import { Progress } from "@/components/ui/progress";
@@ -81,11 +80,6 @@ export default function InstructorDashboard() {
   });
 
   useEffect(() => {
-    // fetchModules();
-    fetchStats();
-  });
-
-  useEffect(() => {
     const tokanId = Cookies.get("instructorTokan") as string;
     if (tokanId) {
       fetchModules(tokanId);
@@ -121,25 +115,25 @@ export default function InstructorDashboard() {
     }
   };
 
-  const fetchStats = async () => {
-    try {
-      const response = await fetch(`/api/assignments?instructorId=${user?.id}`);
-      const data = await response.json();
-      if (response.ok) {
-        const assignments = data.assignments;
-        const completed = assignments.filter((a: any) => a.isCompleted).length;
-        const total = assignments.length;
-        setStats({
-          totalModules: moduleList.length,
-          activeAssignments: total - completed,
-          completedAssignments: completed,
-          completionRate: total > 0 ? Math.round((completed / total) * 100) : 0,
-        });
-      }
-    } catch (error) {
-      console.error("Failed to fetch stats:", error);
-    }
-  };
+  // const fetchStats = async () => {
+  //   try {
+  //     const response = await fetch(`/api/assignments?instructorId=${user?.id}`);
+  //     const data = await response.json();
+  //     if (response.ok) {
+  //       const assignments = data.assignments;
+  //       const completed = assignments.filter((a: any) => a.isCompleted).length;
+  //       const total = assignments.length;
+  //       setStats({
+  //         totalModules: moduleList.length,
+  //         activeAssignments: total - completed,
+  //         completedAssignments: completed,
+  //         completionRate: total > 0 ? Math.round((completed / total) * 100) : 0,
+  //       });
+  //     }
+  //   } catch (error) {
+  //     console.error("Failed to fetch stats:", error);
+  //   }
+  // };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -234,7 +228,6 @@ export default function InstructorDashboard() {
           title: "Success",
           description: "Module deleted successfully",
         });
-        fetchStats(); // Refresh stats
       }
     } catch (error: any) {
       toast({

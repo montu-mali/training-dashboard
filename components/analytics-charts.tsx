@@ -34,7 +34,7 @@ import {
   LabelList,
 } from "recharts"
 import { TrendingUp, Users, BookOpen, Clock, Target, Activity, Zap, Download, RefreshCw } from "lucide-react"
-import { useAuth } from "@/lib/auth-context"
+
 
 interface AnalyticsData {
   overview: {
@@ -98,7 +98,6 @@ interface AnalyticsData {
 }
 
 export function AnalyticsCharts() {
-  const { user } = useAuth()
   const [selectedTimeRange, setSelectedTimeRange] = useState("30d")
   const [isLoading, setIsLoading] = useState(false)
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData>({

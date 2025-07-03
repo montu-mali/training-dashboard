@@ -15,7 +15,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { BookOpen, Loader2 } from "lucide-react";
-import { useAuth } from "@/lib/auth-context";
 import axios from "axios";
 import { toast } from "@/hooks/use-toast";
 import Cookies from "js-cookie";
@@ -29,7 +28,6 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
-  const { login } = useAuth();
 
   const [message, setMessage] = useState("");
 
