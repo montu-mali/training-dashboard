@@ -255,7 +255,7 @@ export function AdminDashboard() {
           </Card>
         </div>
 
-        {/* System Metrics */}
+
         <Card>
           <CardHeader>
             <CardTitle>System Performance</CardTitle>

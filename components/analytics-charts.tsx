@@ -213,13 +213,11 @@ export function AnalyticsCharts() {
 
   const refreshData = async () => {
     setIsLoading(true)
-    // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1000))
     setIsLoading(false)
   }
 
   const exportData = () => {
-    // Simulate data export
     console.log("Exporting analytics data...")
   }
 
