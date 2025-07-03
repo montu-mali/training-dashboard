@@ -1,8 +1,9 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { db } from "@/db/connect";
+import { generateToken } from "@/lib/auth"; // optional
 import bcrypt from "bcrypt";
 
-export async function POST(req:NextRequest) {
+export async function POST(req: Request) {
   try {
     const { email, password } = await req.json();
 
@@ -18,23 +19,16 @@ export async function POST(req:NextRequest) {
       select: { email: true, password: true, id: true, role: true },
     });
 
-    if (!user) {
-      console.log("User not found:", email);
-      return NextResponse.json({
-        success: false,
-        message: "Invalid credentials",
-      });
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      return NextResponse.json(
+        { success: false, message: "Invalid credentials" },
+        { status: 401 }
+      );
     }
 
-    const compPassword = await bcrypt.compare(password, user.password);
-
-    if (!compPassword) {
-      console.log("Invalid password for user:", email);
-      return NextResponse.json({ success: false, message: "invalid password" });
-    }
     return NextResponse.json({
       success: true,
-      message: "Login Successfully",
+      message: "Login Successful",
       data: {
         email: user.email,
         id: user.id,
@@ -42,10 +36,7 @@ export async function POST(req:NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Login API error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    console.error("API ERROR:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
